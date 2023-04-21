@@ -1,11 +1,15 @@
+import platform from './img/platform1.png'
+
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight 
 
-
 const gravity = 1.5
+
+// Images
+
 
 // Création de la Classe Player
 class Player {
@@ -133,8 +137,8 @@ addEventListener('keydown', ({keyCode}) => {
             break
         case 90:
             console.log('up')
-            if (event.repeat) { return }
-                player.velocity.y -= 15
+            //if (event.repeat) { return }
+            player.velocity.y -= 20
             break            
     }
 })
@@ -155,7 +159,7 @@ addEventListener('keyup', ({keyCode}) => {
             break
         case 90:
             console.log('up')
-            player.velocity.y -= 15
+            player.velocity.y -= 20
             break            
     }
 })

@@ -1,5 +1,3 @@
-import platform from './img/platform1.png'
-
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
@@ -9,6 +7,9 @@ canvas.height = window.innerHeight
 const gravity = 1.5
 
 // Images
+const platform_img = new Image()
+platform_img.src = 'http://127.0.0.1:5500/img/platform1.png'
+console.log(platform_img)
 
 
 // Création de la Classe Player
@@ -44,24 +45,26 @@ class Player {
 }
 
 class Platform {
-    constructor( {x , y}) {
+    constructor( {x , y, image}) {
         this.position = {
             y,
             x 
         }
-        this.width = 200
-        this.height = 20
+
+        this.image = image
+        this.width = image.width
+        this.height = image.height
     }
 
     draw() {
-        c.fillStyle = 'blue'
-        c.fillRect(this.position.x, this.position.y, this.width, this.height)
+        c.drawImage(this.image, this.position.x, this.position.y)
     }
 }
 
 const player = new Player()
-const platforms = [new Platform({x: 200, y:800}), new Platform({x:300, y: 700})]
-
+const platforms = [
+    new Platform({x: 200, y:800, image: platform_img}),
+    new Platform({x:300, y: 700, image: platform_img})]
 const keys = {
     right: {
         pressed: false
@@ -77,10 +80,11 @@ let scrollOffset = 0
 function animate() {
     requestAnimationFrame(animate)
     c.clearRect(0,0, canvas.width, canvas.height)
-    player.update()
     platforms.forEach(platform => {
         platform.draw()
     })
+    player.update()
+
 
     if (keys.right.pressed == true && player.position.x < 400 ) {
         player.velocity.x = 5

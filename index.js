@@ -18,7 +18,7 @@ ground_img.src = 'http://127.0.0.1:5500/img/ground.png'
 
 // Background
 const background_img = new Image()
-background_img.src = 'http://127.0.0.1:5500/img/background.png'
+background_img.src = 'http://127.0.0.1:5500/img/background1d.png'
 
 const cloud_img = new Image()
 cloud_img.src = 'http://127.0.0.1:5500/img/clouds.png'

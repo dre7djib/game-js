@@ -18,19 +18,23 @@ ground_img.src = 'http://127.0.0.1:5500/img/ground.png'
 
 // Background
 const background_img = new Image()
-background_img.src = 'http://127.0.0.1:5500/img/background1d.png'
-
-const cloud_img = new Image()
-cloud_img.src = 'http://127.0.0.1:5500/img/clouds.png'
+background_img.src = 'http://127.0.0.1:5500/img/background.gif'
 
 
-
+// Sprites Mario
+const runLeft_img = new Image()
+runLeft_img.src = 'http://127.0.0.1:5500/img/sprites/run_left.png'
+const runRight_img = new Image()
+runRight_img.src = 'http://127.0.0.1:5500/img/sprites/run_right.png'
+const stand_img = new Image()
+stand_img.src = 'http://127.0.0.1:5500/img/sprites/stand.png'
 
 
 
 // Création des Classes
 class Player {
     constructor() {
+        this.speed = 4
         this.position = {
             x : 100,
             y: 100
@@ -40,15 +44,18 @@ class Player {
             y: 0
         }
         this.width = 30
-        this.height = 30
+        this.height = 50
+
+        this.image = stand_img
+    
     }
 
     draw() {
-        c.fillStyle = 'green'
-        c.fillRect(this.position.x, this.position.y, this.width, this.height)
+        c.drawImage(this.image, this.position.x, this.position.y,this.width, this.height)
     }
 
     update() {
+        this.frames++
         this.draw()
         this.position.y += this.velocity.y
         this.position.x += this.velocity.x
@@ -56,7 +63,6 @@ class Player {
 
         if(this.position.y + this.height + this.velocity.y  <= canvas.height)
             this.velocity.y += gravity
-        else this.velocity.y = 0
     }
 }
 class Ground {
@@ -108,26 +114,47 @@ class GenericObjects {
     }
 }
 
-// Création et Placement des éléments
-const player = new Player()
-const platforms = [
-    new Platform({x: 70, y:800, image: platform_img}),
-    new Platform({x:300, y: 400, image: platform_img})]
-const grounds = [
-    // Ground 
-    new Ground({x:-1, y: canvas.height - ground_img.height, image: ground_img}),
-    new Ground({x:ground_img.width - 1, y: canvas.height - ground_img.height, image: ground_img}),
-    new Ground({x:ground_img.width * 2 - 1, y: canvas.height - ground_img.height, image: ground_img}),
-    new Ground({x:ground_img.width * 3 - 1, y: canvas.height - ground_img.height, image: ground_img}),
-]
-const genericObjects = [
-    new GenericObjects({x:0, y:0, image: background_img, height:1024, width:576}),
-    new GenericObjects({x:200, y:100, image: cloud_img, height:120, width:67.5})
-]
-
-
+let player = new Player()
+let platforms = []
+let grounds = []
+let genericObjects = []
 
 let scrollOffset = 0
+
+
+
+// Fonction Init lorsqu'on perds
+function init() {
+    player = new Player()
+    platforms = [
+        new Platform({x:ground_img.width * 5 + 200 -1, y: 400, image: platform_img}),
+        new Platform({x:ground_img.width * 5 + 350 -1, y: 300, image: platform_img}),
+
+    ]
+    grounds = [
+        // Ground 
+        new Ground({x:-1, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width - 3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 2 - 3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 3 + 150, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 4 + 150 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 6 + 200 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 7 + 200 -3, y: canvas.height - (ground_img.height * 3), image: ground_img}),
+        new Ground({x:ground_img.width * 9 + 100 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        
+    
+    ]
+    genericObjects = [
+        new GenericObjects({x:0, y:0, image: background_img, height:1024, width:576}),
+        new GenericObjects({x:background_img.width - 3, y:0, image: background_img, height:1024, width:576}),
+        new GenericObjects({x:background_img.width * 2 - 5, y:0, image: background_img, height:1024, width:576}),
+
+    ]
+
+    scrollOffset = 0
+}
+// Création et Placement des éléments
+
 
 
 
@@ -159,7 +186,7 @@ addEventListener('keydown', ({keyCode}) => {
         case 90:
             console.log('up')
             //if (event.repeat) { return }
-            player.velocity.y -= 10
+            player.velocity.y -= 15
             break            
     }
 })
@@ -180,7 +207,6 @@ addEventListener('keyup', ({keyCode}) => {
             break
         case 90:
             console.log('up')
-            player.velocity.y -= 10
             break            
     }
 })
@@ -203,32 +229,32 @@ function animate() {
 
 
     if (keys.right.pressed == true && player.position.x < 400 ) {
-        player.velocity.x = 5
-    } else if (keys.left.pressed == true && player.position.x > 70) {
-        player.velocity.x = -5
+        player.velocity.x = player.speed
+    } else if ((keys.left.pressed == true && player.position.x > 150) || keys.left.pressed && scrollOffset === 0 && player.position.x > 0 ) {
+        player.velocity.x = -player.speed
     } else {
         player.velocity.x = 0
         if (keys.right.pressed){
-            scrollOffset += 5
+            scrollOffset += player.speed
             platforms.forEach(platform => {
-                platform.position.x -= 5
+                platform.position.x -= player.speed
             } )
             grounds.forEach(ground => {
-                ground.position.x -= 5
+                ground.position.x -= player.speed
             })
             genericObjects.forEach(GenericObjects => {
-                GenericObjects.position.x -= 3
+                GenericObjects.position.x -= player.speed * 0.66
             })
         } else if (keys.left.pressed) {
-            scrollOffset -= 5
+            scrollOffset -= player.speed
             platforms.forEach(platform => {
-                platform.position.x += 5
+                platform.position.x += player.speed
             } )
             grounds.forEach(ground => {
-                ground.position.x += 5
+                ground.position.x += player.speed
             })
             genericObjects.forEach(GenericObjects => {
-                GenericObjects.position.x += 3
+                GenericObjects.position.x += player.speed * 0.66
             })
             
         }
@@ -244,9 +270,6 @@ function animate() {
             player.velocity.y = 0
         }
 
-        if (scrollOffset > 2000) {
-            console.log('Win')
-        }
     })
     grounds.forEach(ground => {
         if (player.position.y + player.height <= ground.position.y 
@@ -261,6 +284,17 @@ function animate() {
         }
     })
 
+
+    // Win
+    if (scrollOffset > 2000) {
+        console.log('Win')
+    }
+
+    // Loose
+    if(player.position.y > canvas.height) {
+        init()
+    }
 }
 
+init()
 animate()

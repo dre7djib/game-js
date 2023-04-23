@@ -26,15 +26,20 @@ const runLeft_img = new Image()
 runLeft_img.src = 'http://127.0.0.1:5500/img/sprites/run_left.png'
 const runRight_img = new Image()
 runRight_img.src = 'http://127.0.0.1:5500/img/sprites/run_right.png'
-const stand_img = new Image()
-stand_img.src = 'http://127.0.0.1:5500/img/sprites/stand.png'
+const stand_left_img = new Image()
+stand_left_img.src = 'http://127.0.0.1:5500/img/sprites/stand_left.png'
+const stand_right_img = new Image()
+stand_right_img.src = 'http://127.0.0.1:5500/img/sprites/stand_right.png'
 
+// Flag
+const flag_img = new Image()
+flag_img.src = 'http://127.0.0.1:5500/img/sprites/flag.png'
 
 
 // Création des Classes
 class Player {
     constructor() {
-        this.speed = 4
+        this.speed = 10
         this.position = {
             x : 100,
             y: 100
@@ -46,16 +51,48 @@ class Player {
         this.width = 30
         this.height = 50
 
-        this.image = stand_img
+        this.image = stand_right_img
+        this.frames = 0
+
+        this.sprites = {
+            stand : {
+                right: stand_right_img,
+                left: stand_left_img,
+                cropWidth : 26,
+                frames : 6
+            },
+            run : {
+                right: runRight_img,
+                left: runLeft_img,
+                cropWidth : 29,
+                frames : 8
+            }
+        }
+
+        this.currentSprite = this.sprites.run.right
+        this.currentCropWidth = 32
+        this.currentFrames = 8
     
     }
 
     draw() {
-        c.drawImage(this.image, this.position.x, this.position.y,this.width, this.height)
+        c.drawImage(
+            this.currentSprite,
+            this.currentCropWidth * this.frames, 
+            0,
+            this.currentCropWidth,
+            35,
+            this.position.x, 
+            this.position.y,
+            this.width, 
+            this.height)
     }
 
     update() {
-        this.frames++
+        this.frames += 1
+        if (this.frames > 8) {
+            this.frames = 0
+        }
         this.draw()
         this.position.y += this.velocity.y
         this.position.x += this.velocity.x
@@ -122,13 +159,15 @@ let genericObjects = []
 let scrollOffset = 0
 
 
-
+// Création et Placement des éléments
 // Fonction Init lorsqu'on perds
 function init() {
     player = new Player()
     platforms = [
         new Platform({x:ground_img.width * 5 + 200 -1, y: 400, image: platform_img}),
         new Platform({x:ground_img.width * 5 + 350 -1, y: 300, image: platform_img}),
+        new Platform({x:ground_img.width * 12 + 100 -1, y: 400, image: platform_img}),
+
 
     ]
     grounds = [
@@ -141,6 +180,12 @@ function init() {
         new Ground({x:ground_img.width * 6 + 200 -3, y: canvas.height - ground_img.height, image: ground_img}),
         new Ground({x:ground_img.width * 7 + 200 -3, y: canvas.height - (ground_img.height * 3), image: ground_img}),
         new Ground({x:ground_img.width * 9 + 100 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 10 + 100 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 11 + 100 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 14 + 100 -3, y: canvas.height - ground_img.height, image: ground_img}),
+        new Ground({x:ground_img.width * 14 + 100 -3, y: canvas.height - (ground_img.height * 2), image: flag_img}),
+
+        
         
     
     ]
@@ -148,18 +193,11 @@ function init() {
         new GenericObjects({x:0, y:0, image: background_img, height:1024, width:576}),
         new GenericObjects({x:background_img.width - 3, y:0, image: background_img, height:1024, width:576}),
         new GenericObjects({x:background_img.width * 2 - 5, y:0, image: background_img, height:1024, width:576}),
-
+        new GenericObjects({x:background_img.width * 3 - 7, y:0, image: background_img, height:1024, width:576}),
     ]
 
     scrollOffset = 0
 }
-// Création et Placement des éléments
-
-
-
-
-
-
 
 const keys = {
     right: {
@@ -169,12 +207,14 @@ const keys = {
         pressed: false
     }
 }
+
 // Appuie sur la touche
 addEventListener('keydown', ({keyCode}) => {
     switch(keyCode) {
         case 81:
             console.log('left')
             keys.left.pressed = true
+            player.currentSprite = player.sprites.run.left
             break
         case 83:
             console.log('down')
@@ -182,11 +222,12 @@ addEventListener('keydown', ({keyCode}) => {
         case 68:
             console.log('right')
             keys.right.pressed = true
+            player.currentSprite = player.sprites.run.right
             break
         case 90:
             console.log('up')
             //if (event.repeat) { return }
-            player.velocity.y -= 15
+            player.velocity.y -= 12
             break            
     }
 })
@@ -278,16 +319,13 @@ function animate() {
             && player.position.x <= ground.position.x + ground.width) {
             player.velocity.y = 0
         }
-
-        if (scrollOffset > 2000) {
-            console.log('Win')
-        }
     })
 
 
     // Win
-    if (scrollOffset > 2000) {
-        console.log('Win')
+    if (scrollOffset > ground_img.width * 13 + 50 -3) {
+        alert('You Won')
+        init()
     }
 
     // Loose
